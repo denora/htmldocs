@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
+<link rel="icon" href="html_docs/images/favicon.ico" type="image/x-icon">
+<link rel="stylesheet" type="text/css" href="sdmenu/sdmenu.css" />
+<title>Denora IRC Stats v1.5 Documentation</title>
+</head>
+
+<body>
+
+
+Denora XMLRPC Module Coding<br />
+-- <br />
+---------------------<br />
+<br />
+1) Intro<br />
+2) Basics<br />
+3) Triggered Events List<br />
+<br />
+1) Introduction to XMLRPC Module Coding<br />
+<br />
+    XMLRPC is a powerful tool to get information from Denora, this document
+    covers how to create your own methods and handle returning data to the
+    requestor.<br />
+<br />
+2) Basics<br />
+<br />
+    A) All functions must be formatted like this:<br />
+<pre>
+        int functioname(deno_socket_t xmlsocket, int ac, char **av);<br />
+</pre>
+    B) In DenoraInit you must declare XMLRPC Method in some fashion; it is into
+       this variable that we will create the method handler. Here is what
+       the base DenoraInit should look like at this point:<br />
+<br />
+<pre>
+        int DenoraInit(int argc, char **argv)
+        {
+            XMLRPCCmd *xml = NULL;
+            int status;
+
+            moduleAddAuthor(AUTHOR);
+            moduleAddVersion(VERSION);
+            return MOD_CONT;
+        }
+</pre>
+<br />
+    C) Pass "createXMLCommand" the name of the method. <br />
+<pre>
+        xml = createXMLCommand("denora.getstat", xmlrpc_getstat);<br />
+</pre>
+    D) The Handler is not ready for use yet; now you must add it to the hash
+       with "moduleAddXMLRPCcmd". You will want to pass to this function the
+       return of "createXMLCommand"<br />
+<pre>
+        status = moduleAddXMLRPCcmd(xml);<br />
+</pre>
+       It will return the same module error codes as adding a regular message,
+       which you can use to confirm it was added correctly.<br />
+<br />
+    E) With that setup in your function you will be passed a socket that will
+       be the user's socket that asked for the info, an array count and an array<br />
+<pre>
+           int xmlrpc_getstat(deno_socket_t xmlsocket, int ac, char **av)
+           {
+               char buf[BUFSIZE];
+               *buf = '\0';
+
+               if (!stricmp(av[0], "users")) {
+                   ircsnprintf(buf, BUFSIZE, "<i4>%ld</i4>", (long int) stats->users);
+               } else if (!stricmp(av[0], "chans")) {
+                   ircsnprintf(buf, BUFSIZE, "<i4>%ld</i4>", (long int) stats->chans);
+               } else {<br />
+                   ircsnprintf(buf, BUFSIZE, "<i4>%ld</i4>", (long int) stats->users);
+               }
+
+               xmlrpc_send(xmlsocket, 1, buf);
+
+               return MOD_CONT;
+           }
+</pre>
+        note that for a valid XMLRPC method it must have an argument, this is part of the XMLRPC
+        standard. Place your data into a buffer and send it to back to the requestor.<br />
+<br />
+3) API for XMLRPC<br />
+<br />
+    char *xmlrpc_array(int argc, ...) - used to turn a char array into a XMLRPC array<br />
+  <br />
+    char *xmlrpc_double(char *buf, double value) - returns a XMLRPC formatted tag for integers that are doubles, must
+                                                   pass the buffer to append the data to.<br />
+<br />
+    char *xmlrpc_base64(char *buf, char *value)  - returns a XMLRPC formatted tag for base64 encoding, must
+                                                   pass the buffer to append the data to.<br />
+<br />
+    char *xmlrpc_boolean(char *buf, int value)   - returns a XMLRPC formatted tag for integers that are boolean, must
+                                                   pass the buffer to append the data to.<br />
+<br />
+    char *xmlrpc_string(char *buf, char *value)  - returns a XMLRPC formatted tag for a string, must
+                                                   pass the buffer to append the data to.<br />
+<br />
+    char *xmlrpc_integer(char *buf, int value)   - returns a XMLRPC formatted tag for integers, must
+                                                   pass the buffer to append the data to.<br />
+<br />
+    char *xmlrpc_time2date(char *buf, time_t t)  - returns a XMLRPC formatted tag for a current time, must
+                                                   pass the buffer to append the data to.<br />
+<br />
+    void xmlrpc_send(deno_socket_t socket_fd, int argc, ...) - write your buffer back to the requestor, pass it as many arguments
+                                                               as needed.<br />
+<br />
+    int xmlrpc_set_options(int type, const char *value) - set options for the XMLRPC functions<br />
+	                                                  Valid types are<br />
+							      * XMLRPC_HTTP_HEADER<br />
+							      * XMLRPC_ENCODE<br />
+ 							      * XMLRPC_INTTAG<br />
+<br />
+                                                          XMLRPC_HTTP_HEADER can either be set to XMLRPC_ON, XMLRPC_OFF<br />
+                                                          XMLRPC_INTTAG can either be set ot XMLRPC_I4, XMLRPC_INT<br />
+<br />
+    void xmlrpc_generic_error(deno_socket_t socket_fd, int code, const char *string, ...) - return a generic "fault" error back to
+                                                                                            the requestor<br />
+<br />
+    int xmlrpc_getlast_error(void) - get the last error code from the XMLRPC layer.<br />
+<br />
