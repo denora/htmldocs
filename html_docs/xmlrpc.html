@@ -30,15 +30,15 @@ Denora XMLRPC Support<br />
     3. XMLRPC enabled client code (PHP, ASP, etc)<br />
 <br />
 3) Configuration<br />
-<br />
-    xmlrpc {<br />
-    	xmlrpc_enable                   # You must set this for XMLRPC to start<br />
-        xmlrpc_host 127.0.0.1;          # IP address to have the XMLRPC server on<br />
-        xmlrpc_port 8080;               # Port on which to listen to<br />
-        xmlrpc_accept 127.0.0.1;        # Accept only data from these hosts<br />
-        xmlrpc_accept 192.168.0.1;      # Accept only data from these hosts<br />
-    };<br />
-<br />
+<pre>
+    xmlrpc {
+    	xmlrpc_enable                   # You must set this for XMLRPC to start
+        xmlrpc_host 127.0.0.1;          # IP address to have the XMLRPC server on
+        xmlrpc_port 8080;               # Port on which to listen to
+        xmlrpc_accept 127.0.0.1;        # Accept only data from these hosts
+        xmlrpc_accept 192.168.0.1;      # Accept only data from these hosts
+    };
+</pre>
     xmlrpc_enable - enables the XMLRPC server and its modules to load on startup<br />
     xmlrpc_host   - is the IP address by which to bind the XMLRPC server to<br />
     xmlrpc_port   - is the port on which the XMLRPC server will be listening<br />
@@ -66,20 +66,20 @@ Denora XMLRPC Support<br />
 <br />
 	This is a very simple PHP example<br />
 <pre>
-	<?php
+	&lt;?php
 
 	$string = xmlrpc_encode_request("denora.getstat","users");
 
 	printf("XMLRPC call");
-	echo("<pre>");
+	echo("&lt;pre>");
 	print(htmlspecialchars($string));
-	echo("</pre>");
+	echo("&lt;/pre>");
 
 	$data = NULL;
 
 	$fp = @fsockopen ("127.0.0.1", 9090, $errno, $errstr, 30);
 	if (!$fp) { 
-	   echo "Error in Connecting : $errstr ($errno)<br>\n"; 
+	   echo "Error in Connecting : $errstr ($errno)&lt;br>\n"; 
 	} else { 
 	   fputs ($fp, $string); 
 	   while (!feof($fp)) { 
@@ -89,9 +89,9 @@ Denora XMLRPC Support<br />
 	}
 
 	printf("XMLRPC client data");
-	echo("<pre>");
+	echo("&lt;pre>");
 	printf("%s", htmlspecialchars($data));
-	echo("</pre>");
+	echo("&lt;/pre>");
 
 	$array = xmlrpc_decode($data);
 
