@@ -108,15 +108,15 @@ Denora Internal Events<br />
 </pre>
     C) Pass "createEventHook" the name of the event. In this case we are
        going to hook to the saving of databases, "EVENT_DB_SAVING".<br />
-<br />
+<pre>
         hook = createEventHook(EVENT_DB_SAVING, my_save);<br />
-<br />
+</pre>
     D) The Handler is not ready for use yet; now you must add it to the hash
        with "moduleAddEventHook". You will want to pass to this function the
        return of "createEventHook"<br />
-<br />
+<pre>
         status = moduleAddEventHook(hook);<br />
-<br />
+</pre>
        It will return the same module error codes as adding a regular message,
        which you can use to confirm it was added correctly.<br />
 <br />
